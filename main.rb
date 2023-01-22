@@ -28,6 +28,7 @@ class Knight
     def get_posible_coordinates
         @coordinate_list = MOVEMENTS.map { |a, b|  [@actual_position[0]-a, @actual_position[1]-b] }
         @coordinate_list.select! {|a,b| a > 0 && a < 9 && b > 0 && b < 9}
+        @coordinate_list = @coordinate_list - @visited_queue - @actual_position
     end
 
     def choose_path(coordinate_list)
@@ -35,14 +36,16 @@ class Knight
             @path.push(@actual_position, @final_position)
             @counter += 1
             @counter_list.push(@counter)
-            @counter = 0
+            @counter -= 1
             check_shortest_path
             return
         else
             @counter += 1
             @path.push(@actual_position)
+            @visited_queue.push(@actual_position)
             @coordinate_list.map do |coordinate|
                 @actual_position = coordinate
+                @coordinate_list = @coordinate_list - @actual_position
                 get_posible_coordinates
                 choose_path(@coordinate_list)
             end
@@ -59,6 +62,7 @@ class Knight
             @shortest_path = @path
         end
         @path = []
+        @path.push(@initial_position)
     end
 end
 
@@ -68,7 +72,7 @@ def knights_travels(initial_position, final_position)
     return puts "You can get there in #{knight.counter} moves and your path is #{knight.shortest_path}" if @initial_position == @final_position
 end
 
-knights_travels([1,1], [4,4])
+knights_travels([1,1], [5,6])
 
 
 
