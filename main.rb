@@ -7,6 +7,15 @@ class Board
     end
 end
 
+class Node
+    attr_accessor :location, :parent
+
+    def initialize(location, parent)
+        @location = location
+        @parent = parent
+    end
+end
+
 class Knight
     attr_accessor :children, :position, :visited_queue, :final_position
 
@@ -22,21 +31,24 @@ class Knight
         @board = Board.new.arr
     end
 
-    def get_posible_coordinates
-        @children = MOVEMENTS.map { |a, b|  [@position[0]-a, @position[1]-b] }
+    def get_posible_coordinates(current_node)
+        @children = MOVEMENTS.map { |a, b|  [current_node[0]-a, current_node[1]-b] }
         @children.select! {|a,b| a > 0 && a < 9 && b > 0 && b < 9}
         @children = @children - @visited_queue
     end
 
     def traverse
-        @queue.push(@position)
-        @visited_queue.push(@position)
+        current_node = Node.new(@position, nil)
+        @queue.push(current_node.location)
+        @visited_queue.push(current_node.location)
         while @queue.empty? == false
-            @position = @queue.shift
-            if @position == @final_position
-                return "llegué"
+            current_node.parent = current_node.location
+            current_node.location = @queue.shift
+            if current_node.location == @final_position
+                puts "llegué"
+                return 
             end
-            @children = get_posible_coordinates
+            @children = get_posible_coordinates(current_node.location)
             @children.map do |child| 
                 if !@visited_queue.include?(child)
                     @visited_queue.push(child)
@@ -63,7 +75,7 @@ def knights_travels(initial_position, final_position)
     knight.play
 end
 
-knights_travels([1,1], [3,2])
+knights_travels([1,1], [3,5])
 
 
 
