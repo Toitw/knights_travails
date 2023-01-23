@@ -17,7 +17,7 @@ class Node
 end
 
 class Knight
-    attr_accessor :children, :position, :visited_queue, :final_position
+    attr_accessor :children, :position, :visited_queue, :final_position, :path
 
     MOVEMENTS = [[1,2],[2,1],[-1,2],[1,-2],[2,-1],[-2,1],[-1,-2],[-2,-1]]
 
@@ -30,14 +30,15 @@ class Knight
         @path = []
         @board = Board.new.arr
     end
-
+    #First add to children the posible future locations, then filter the not valid and finally create
+    #a node for each position so I can store its parent
     def get_posible_coordinates(current_node)
-        @children = MOVEMENTS.map { |a, b|  [current_node[0]-a, current_node[1]-b] }
+        @children = MOVEMENTS.map { |a, b|  [current_node.location[0]-a, current_node.location[1]-b] }
         @children.select! {|a,b| a > 0 && a < 9 && b > 0 && b < 9}
         @children = @children - @visited_queue
         @children.map { |position| Node.new(position, current_node)}
     end
-
+    #Breadth first algorithm for graphs
     def traverse
         current_node = Node.new(@position, nil)
         @queue.push(current_node)
@@ -45,11 +46,12 @@ class Knight
         while @queue.empty? == false
             current_node = @queue.shift
             if current_node.location == @final_position
-                p current_node.parent
-                puts "llegué"
+                print_path(current_node)
+                @path.push(current_node.location)
+                puts "My path #{@path} in #{@path.length} moves"
                 return 
             end
-            @children = get_posible_coordinates(current_node.location)
+            @children = get_posible_coordinates(current_node)
             
             @children.map do |child| 
                 if !@visited_queue.include?(child)
@@ -60,24 +62,23 @@ class Knight
         end
     end
 
+    def print_path(node)
+        return if node.parent == nil
+        @path.unshift(node.parent.location)
+        node = node.parent
+        print_path(node)
+    end
+
     def play
         traverse
     end
-    def check_shortest_path
-        if @shortest_path.length == 0 || @path.length < @shortest_path.length
-            @shortest_path = @path
-        end
-        @path = []
-        @path.push(@initial_position)
-    end
-end
 
 def knights_travels(initial_position, final_position)
     knight = Knight.new(initial_position, final_position)
     knight.play
 end
 
-knights_travels([1,1], [5,4])
+knights_travels([1,1], [8,8])
 
 
 
